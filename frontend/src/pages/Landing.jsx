@@ -40,8 +40,7 @@ const Landing = () => {
           <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.3rem' }}>CodeForge</span>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
-          <Link to="/login" className="btn-secondary">Login</Link>
-          <Link to="/signup" className="btn-primary">Get Started <ArrowRight size={16} /></Link>
+          <Link to="/dashboard" className="btn-primary">Dashboard <ArrowRight size={16} /></Link>
         </div>
       </nav>
 
@@ -62,8 +61,8 @@ const Landing = () => {
           learning path that adapts to your weaknesses in real-time.
         </p>
         <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
-          <Link to="/signup" className="btn-primary" style={{ padding: '16px 36px', fontSize: '1rem' }}>
-            Start Learning Free <ArrowRight size={18} />
+          <Link to="/dashboard" className="btn-primary" style={{ padding: '16px 36px', fontSize: '1rem' }}>
+            Start Learning Now <ArrowRight size={18} />
           </Link>
           <Link to="/problems" className="btn-secondary" style={{ padding: '16px 36px', fontSize: '1rem' }}>
             Try a Problem

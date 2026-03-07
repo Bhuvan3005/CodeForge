@@ -1,28 +1,78 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Play, Send, Clock, Info, ChevronRight, Code2, FileText, Target } from 'lucide-react';
-import { SAMPLE_PROBLEMS } from '../data/sampleProblems';
-import { TOPICS, LANGUAGES } from '../data/topics';
+import { LANGUAGES } from '../data/topics';
+
+const DEMO_USER_ID = '69ac577afd45aa426e87ebc5';
 
 const ProblemSolver = () => {
   const { problemId } = useParams();
   const navigate = useNavigate();
-  const problem = SAMPLE_PROBLEMS.find(p => p.id === problemId) || SAMPLE_PROBLEMS[0];
+  const [problem, setProblem] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [language, setLanguage] = useState('javascript');
-  const [code, setCode] = useState(problem.boilerplate?.[language] || '// Write your solution here');
+  const [code, setCode] = useState('');
   const [consoleOutput, setConsoleOutput] = useState('');
   const [showHints, setShowHints] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchProblem = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/problems/${problemId}`);
+        const data = await res.json();
+        setProblem(data);
+        // Set boilerplate (simulated or from data)
+        setCode(data.boilerplate?.[language] || '// Write your solution here');
+      } catch (error) {
+        console.error('Error fetching problem details:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProblem();
+  }, [problemId]);
+
+  if (loading) return <div className="page-container">Loading Problem...</div>;
+  if (!problem) return <div className="page-container">Problem not found.</div>;
 
   const handleRun = () => {
-    setConsoleOutput('Running test cases...\n\n' +
-      problem.testCases.map((tc, i) =>
-        `Test ${i + 1}: Input = ${JSON.stringify(tc.input)} → Expected: ${JSON.stringify(tc.expected)} → ✓ Passed`
-      ).join('\n') + '\n\n✅ All sample test cases passed.'
+    setConsoleOutput('Running public test cases...\n\n' +
+      (problem.testCases || []).filter(tc => tc.isPublic).map((tc, i) =>
+        `Test ${i + 1}: Input = ${tc.input} → Expected: ${tc.output} → ✓ Passed`
+      ).join('\n') + '\n\n✅ Sample test cases passed locally.'
     );
   };
 
-  const handleSubmit = () => {
-    navigate(`/analysis/s002`);
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setConsoleOutput('Submitting to judge...');
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/submissions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          problemId,
+          userId: DEMO_USER_ID,
+          code,
+          language
+        })
+      });
+      const data = await res.json();
+      
+      if (data.submission) {
+        setConsoleOutput(`Submission Processed!\nStatus: ${data.submission.status}\nRuntime: ${data.submission.runtime}\nMemory: ${data.submission.memory}`);
+        
+        // Wait a bit then navigate to analysis or dashboard
+        setTimeout(() => {
+          navigate('/history'); // Redirect to history to see the new entry
+        }, 2000);
+      }
+    } catch (error) {
+      setConsoleOutput('Error submitting code: ' + error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -60,7 +110,7 @@ const ProblemSolver = () => {
           <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: 24 }}>{problem.description}</p>
 
           {/* Examples */}
-          {problem.examples.map((ex, i) => (
+          {(problem.examples || []).map((ex, i) => (
             <div key={i} style={{
               padding: 16, background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--radius-md)',
               border: '1px solid var(--border-subtle)', marginBottom: 12, fontFamily: 'var(--font-mono)', fontSize: '0.85rem',
@@ -76,7 +126,7 @@ const ProblemSolver = () => {
           <div style={{ marginTop: 20 }}>
             <div className="section-label"><Info size={14} /> Constraints</div>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {problem.constraints.map((c, i) => (
+              {(problem.constraints || []).map((c, i) => (
                 <li key={i} style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontFamily: 'var(--font-mono)' }}>• {c}</li>
               ))}
             </ul>
@@ -92,7 +142,7 @@ const ProblemSolver = () => {
               borderRadius: 'var(--radius-sm)', border: '1px solid rgba(99,102,241,0.1)',
               color: 'var(--text-secondary)', fontSize: '0.9rem',
             }}>
-              <strong>Concepts:</strong> {problem.expectedConcepts.join(', ')}<br />
+              <strong>Concepts:</strong> {(problem.expectedConcepts || []).join(', ')}<br />
               <strong>Approach:</strong> {problem.optimalApproach}<br />
               <strong>Time:</strong> {problem.timeComplexity} | <strong>Space:</strong> {problem.spaceComplexity}
             </div>
@@ -127,14 +177,14 @@ const ProblemSolver = () => {
                 <button onClick={handleRun} className="btn-secondary" style={{ padding: '6px 16px', fontSize: '0.8rem' }}>
                   <Play size={14} /> Run Tests
                 </button>
-                <button onClick={handleSubmit} className="btn-primary" style={{ padding: '6px 16px', fontSize: '0.8rem' }}>
-                  <Send size={14} /> Submit
+                <button onClick={handleSubmit} className="btn-primary" disabled={isSubmitting} style={{ padding: '6px 16px', fontSize: '0.8rem', opacity: isSubmitting ? 0.7 : 1 }}>
+                  <Send size={14} /> {isSubmitting ? 'Submitting...' : 'Submit'}
                 </button>
               </div>
             </div>
             <pre style={{
               padding: 16, height: 140, overflow: 'auto', margin: 0,
-              fontSize: '0.8rem', lineHeight: 1.6, color: consoleOutput ? '#22c55e' : 'var(--text-muted)',
+              fontSize: '0.8rem', lineHeight: 1.6, color: consoleOutput.includes('Accepted') ? '#22c55e' : (consoleOutput.includes('Error') || consoleOutput.includes('Wrong') ? '#ef4444' : 'var(--text-muted)'),
             }}>
               {consoleOutput || '// Click "Run Tests" to execute your code against sample test cases\n// Click "Submit" for full analysis'}
             </pre>

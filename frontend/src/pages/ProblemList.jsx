@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Code2, Search, Filter, CheckCircle, AlertCircle, Circle } from 'lucide-react';
-import { SAMPLE_PROBLEMS } from '../data/sampleProblems';
 import { TOPICS } from '../data/topics';
 
 const STATUS_ICONS = {
@@ -11,11 +10,28 @@ const STATUS_ICONS = {
 };
 
 const ProblemList = () => {
+  const [problems, setProblems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [diffFilter, setDiffFilter] = useState('All');
   const [topicFilter, setTopicFilter] = useState('All');
 
-  const filtered = SAMPLE_PROBLEMS.filter(p => {
+  useEffect(() => {
+    const fetchProblems = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/problems`);
+        const data = await res.json();
+        setProblems(data);
+      } catch (error) {
+        console.error('Error fetching problems:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProblems();
+  }, []);
+
+  const filtered = problems.filter(p => {
     if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
     if (diffFilter !== 'All' && p.difficulty !== diffFilter) return false;
     if (topicFilter !== 'All' && !p.topics.includes(topicFilter)) return false;
@@ -58,27 +74,30 @@ const ProblemList = () => {
           <span></span><span>Title</span><span>Difficulty</span><span>Topics</span><span>Accept %</span>
         </div>
         <div className="stagger-children">
-          {filtered.map(p => (
-            <Link to={`/problems/${p.id}`} key={p.id} style={{
-              display: 'grid', gridTemplateColumns: '40px 1fr 100px 200px 80px',
-              gap: 16, padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)',
-              textDecoration: 'none', alignItems: 'center', transition: 'background 0.2s',
-            }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-            >
-              <span>{STATUS_ICONS[p.status]}</span>
-              <span style={{ fontWeight: 500, color: 'var(--text-primary)', fontSize: '0.9rem' }}>{p.title}</span>
-              <span className={`badge badge-${p.difficulty.toLowerCase()}`}>{p.difficulty}</span>
-              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                {p.topics.map(t => {
-                  const topic = TOPICS.find(x => x.id === t);
-                  return <span key={t} className="badge badge-topic" style={{ fontSize: '0.65rem' }}>{topic?.name}</span>;
-                })}
-              </div>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontFamily: 'var(--font-mono)' }}>{p.acceptance}%</span>
-            </Link>
-          ))}
+          {loading ? (
+            <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>Loading problems...</div>
+          ) : filtered.length === 0 ? (
+            <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>No problems found.</div>
+          ) : (
+            filtered.map(p => (
+              <Link to={`/problems/${p._id}`} key={p._id} style={{
+                display: 'grid', gridTemplateColumns: '40px 1fr 100px 200px 80px',
+                gap: 16, padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)',
+                textDecoration: 'none', alignItems: 'center', transition: 'background 0.2s',
+              }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                <span>{STATUS_ICONS[p.status || 'new']}</span>
+                <span style={{ fontWeight: 500, color: 'var(--text-primary)', fontSize: '0.9rem' }}>{p.title}</span>
+                <span className={`badge badge-${p.difficulty.toLowerCase()}`}>{p.difficulty}</span>
+                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                  <span className="badge badge-topic" style={{ fontSize: '0.65rem' }}>{p.topic}</span>
+                </div>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontFamily: 'var(--font-mono)' }}>{p.acceptance || 'N/A'}%</span>
+              </Link>
+            ))
+          )}
         </div>
       </div>
     </div>

@@ -1,17 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { History, Search, CheckCircle, XCircle, Clock, Eye } from 'lucide-react';
-import { RECENT_SUBMISSIONS } from '../data/sampleProblems';
 
-// Extend submissions for demo
-const ALL_SUBMISSIONS = [...RECENT_SUBMISSIONS, ...RECENT_SUBMISSIONS.map((s, i) => ({
-  ...s, id: `s${10+i}`, date: '2026-03-0' + (i + 1),
-}))];
+const DEMO_USER_ID = '69ac577afd45aa426e87ebc5';
 
 const SubmissionHistory = () => {
+  const [submissions, setSubmissions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All');
 
-  const filtered = ALL_SUBMISSIONS.filter(s => filter === 'All' || s.verdict === filter);
+  useEffect(() => {
+    const fetchSubmissions = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/submissions/${DEMO_USER_ID}`);
+        const data = await res.json();
+        setSubmissions(data);
+      } catch (error) {
+        console.error('Error fetching submissions:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSubmissions();
+  }, []);
+
+  const filtered = submissions.filter(s => filter === 'All' || s.status === filter);
 
   return (
     <div className="page-container">
@@ -40,19 +53,25 @@ const SubmissionHistory = () => {
           <span>Problem</span><span>Verdict</span><span>Language</span><span>Runtime</span><span>Date</span><span></span>
         </div>
         <div className="stagger-children">
-          {filtered.map((s, i) => (
-            <div key={i} style={{
-              display: 'grid', gridTemplateColumns: '1fr 140px 90px 90px 90px 50px',
-              gap: 12, padding: '14px 20px', borderBottom: '1px solid var(--border-subtle)', alignItems: 'center',
-            }}>
-              <Link to={`/problems/${s.problemId}`} style={{ fontWeight: 500, fontSize: '0.9rem', color: 'var(--text-primary)', textDecoration: 'none' }}>{s.problemTitle}</Link>
-              <VerdictPill verdict={s.verdict} />
-              <span className="mono" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{s.language}</span>
-              <span className="mono" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{s.runtime}</span>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{s.date}</span>
-              <Link to={`/analysis/${s.id}`} title="View Analysis"><Eye size={16} color="var(--text-muted)" /></Link>
-            </div>
-          ))}
+          {loading ? (
+            <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>Loading history...</div>
+          ) : filtered.length === 0 ? (
+            <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>No submissions found.</div>
+          ) : (
+            filtered.map((s, i) => (
+              <div key={i} style={{
+                display: 'grid', gridTemplateColumns: '1fr 140px 90px 90px 90px 50px',
+                gap: 12, padding: '14px 20px', borderBottom: '1px solid var(--border-subtle)', alignItems: 'center',
+              }}>
+                <Link to={`/problems/${s.problemId?._id}`} style={{ fontWeight: 500, fontSize: '0.9rem', color: 'var(--text-primary)', textDecoration: 'none' }}>{s.problemId?.title || 'Unknown Problem'}</Link>
+                <VerdictPill verdict={s.status} />
+                <span className="mono" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{s.language}</span>
+                <span className="mono" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{s.runtime}</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{new Date(s.createdAt).toLocaleDateString()}</span>
+                <Link to={`/analysis/${s._id}`} title="View Analysis"><Eye size={16} color="var(--text-muted)" /></Link>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

@@ -1,89 +1,117 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
-import { BarChart3, TrendingUp, Target, Brain } from 'lucide-react';
-import { TOPICS } from '../data/topics';
-import { USER_MASTERY, USER_STATS } from '../data/sampleProblems';
+import { 
+  BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell,
+  AreaChart, Area
+} from 'recharts';
+import { BarChart3, Target, Zap, TrendingUp, Award } from 'lucide-react';
 
-const radarData = TOPICS.map(t => ({ subject: t.name.length > 10 ? t.name.slice(0, 10) + '…' : t.name, mastery: USER_MASTERY[t.id] || 0, fullMark: 100 }));
-const barData = TOPICS.slice(0, 10).map(t => ({ name: t.name.length > 8 ? t.name.slice(0, 8) : t.name, solved: Math.floor(Math.random() * 20) + 2, attempted: Math.floor(Math.random() * 10) + 3 }));
-
-const activityData = [];
-const months = ['Jan', 'Feb', 'Mar'];
-months.forEach(m => { for (let d = 1; d <= 28; d++) { activityData.push({ day: `${m} ${d}`, count: Math.floor(Math.random() * 5) }); } });
+const DEMO_USER_ID = '69ac577afd45aa426e87ebc5';
 
 const ProgressAnalytics = () => {
-  const weakTopics = Object.entries(USER_MASTERY).sort(([,a],[,b]) => a - b).slice(0, 3).map(([id, val]) => ({ ...TOPICS.find(t => t.id === id), mastery: val }));
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/progress/${DEMO_USER_ID}`);
+        if (!res.ok) throw new Error('Failed to fetch');
+        const progressData = await res.json();
+        setData(progressData);
+      } catch (error) {
+        console.error('Error fetching analytics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAnalytics();
+  }, []);
+
+  if (loading) return <div className="page-container">Loading Analytics...</div>;
+  if (!data) return <div className="page-container">No analytics data found.</div>;
+
+  const topicData = (data.topicProgress || []).map(tp => ({
+    name: tp.topic,
+    value: tp.solved
+  }));
+
+  // Mock activity data if backend doesn't provide it yet
+  const activityData = [
+    { day: 'Mon', count: 2 }, { day: 'Tue', count: 4 }, { day: 'Wed', count: 3 },
+    { day: 'Thu', count: 7 }, { day: 'Fri', count: 5 }, { day: 'Sat', count: 8 },
+    { day: 'Sun', count: 6 },
+  ];
 
   return (
     <div className="page-container">
       <div className="page-header animate-fade-in-up">
         <div className="section-label"><BarChart3 size={14} /> Analytics</div>
-        <h1><span className="glow-text">Progress Dashboard</span></h1>
-        <p>Track your DSA journey across all topics.</p>
+        <h1><span className="glow-text">Performance Metrics</span></h1>
+        <p>Deep dive into your learning patterns and progress.</p>
       </div>
 
-      {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 16, marginBottom: 32 }} className="stagger-children">
-        {[
-          { label: 'Problems Solved', value: USER_STATS.totalSolved },
-          { label: 'Accuracy', value: `${USER_STATS.accuracy}%` },
-          { label: 'Day Streak', value: USER_STATS.streak },
-          { label: 'Optimal Rate', value: `${USER_STATS.optimalRate}%` },
-        ].map((s, i) => (
-          <div key={i} className="glass-card" style={{ padding: 20, textAlign: 'center' }}>
-            <div style={{ fontSize: '1.8rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }} className="accent-text">{s.value}</div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: 4 }}>{s.label}</div>
-          </div>
-        ))}
+      {/* Overview Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 32 }}>
+        <MiniStat label="Problems Solved" value={data.problemsSolved} sub="Lifetime" color="var(--green)" />
+        <MiniStat label="Current Streak" value={data.streak} sub="Days" color="var(--accent-primary)" />
+        <MiniStat label="Total Attempted" value={data.problemsAttempted} sub="Global" color="var(--yellow)" />
+        <MiniStat label="Topics Explored" value={data.topicProgress?.length || 0} sub="Concepts" color="#a855f7" />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
-        {/* Radar */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 24 }}>
+        {/* Activity Chart */}
         <div className="glass-card" style={{ padding: 24 }}>
-          <h3 style={{ fontSize: '1rem', marginBottom: 16 }}>Skill Radar (All Topics)</h3>
-          <ResponsiveContainer width="100%" height={320}>
-            <RadarChart data={radarData}>
-              <PolarGrid stroke="rgba(255,255,255,0.06)" />
-              <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 9 }} />
-              <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-              <Radar dataKey="mastery" stroke="#6366f1" fill="#6366f1" fillOpacity={0.15} strokeWidth={2} />
-            </RadarChart>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+            <h3 style={{ fontSize: '1rem' }}>Activity Trend</h3>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={activityData}>
+              <defs>
+                <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+              <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+              <Tooltip 
+                contentStyle={{ background: '#1e1b4b', border: '1px solid #312e81', borderRadius: '8px' }}
+                itemStyle={{ color: '#e2e8f0' }}
+              />
+              <Area type="monotone" dataKey="count" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" />
+            </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Bar chart */}
+        {/* Topic Breakdown */}
         <div className="glass-card" style={{ padding: 24 }}>
-          <h3 style={{ fontSize: '1rem', marginBottom: 16 }}>Problems by Topic</h3>
-          <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={barData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-              <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 10 }} />
-              <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} />
-              <Tooltip contentStyle={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#f1f5f9' }} />
-              <Bar dataKey="solved" fill="#6366f1" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="attempted" fill="#a855f730" radius={[4, 4, 0, 0]} />
+          <h3 style={{ fontSize: '1rem', marginBottom: 24 }}>Topic Proficiency</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={topicData} layout="vertical" margin={{ left: 0, right: 30 }}>
+              <XAxis type="number" hide />
+              <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} width={80} />
+              <Tooltip cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+              <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
+                {topicData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#6366f1' : '#a855f7'} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Weak Areas */}
-      <div className="glass-card" style={{ padding: 24 }}>
-        <h3 style={{ fontSize: '1rem', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}><Target size={18} color="var(--red)" /> Areas Needing Improvement</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-          {weakTopics.map((t, i) => (
-            <Link to={`/learn/${t.id}`} key={i} className="glass-card glass-card-interactive" style={{ padding: 16, textDecoration: 'none', textAlign: 'center' }}>
-              <span style={{ fontSize: '2rem', display: 'block', marginBottom: 8 }}>{t.icon}</span>
-              <div style={{ fontWeight: 600, marginBottom: 4, color: 'var(--text-primary)' }}>{t.name}</div>
-              <div style={{ color: 'var(--red)', fontSize: '1.4rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>{t.mastery}%</div>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>mastery</div>
-            </Link>
-          ))}
         </div>
       </div>
     </div>
   );
 };
+
+const MiniStat = ({ label, value, sub, color }) => (
+  <div className="glass-card" style={{ padding: 20 }}>
+    <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: 4 }}>{label}</div>
+    <div style={{ fontSize: '1.4rem', fontWeight: 700, color }}>{value}</div>
+    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2 }}>{sub}</div>
+  </div>
+);
 
 export default ProgressAnalytics;
