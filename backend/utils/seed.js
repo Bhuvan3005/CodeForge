@@ -50,10 +50,12 @@ const seedData = async () => {
 
     // 2. Create a demo user
     const user = await User.create({
-      _id: new mongoose.Types.ObjectId('69ac577afd45aa426e87ebc5'),
-      name: 'Demo Engineer',
-      email: 'demo@codeforge.com',
+      _id: new mongoose.Types.ObjectId('69ad590e58fc6e2b87b939d5'),
+      name: 'bhuvannayak3005',
+      email: 'bhuvannayak3005@gmail.com',
       password: 'password123',
+      authProvider: 'email',
+      isEmailVerified: true,
       solvedProblems: [problems[0]._id],
       weakTopics: ['String']
     });

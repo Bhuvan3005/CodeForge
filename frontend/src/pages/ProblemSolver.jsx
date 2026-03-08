@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Play, Send, Clock, Info, ChevronRight, Code2, FileText, Target } from 'lucide-react';
 import { LANGUAGES } from '../data/topics';
 
-const DEMO_USER_ID = '69ac577afd45aa426e87ebc5';
+// Removed hardcoded DEMO_USER_ID
 
 const ProblemSolver = () => {
   const { problemId } = useParams();
@@ -48,12 +48,22 @@ const ProblemSolver = () => {
     setIsSubmitting(true);
     setConsoleOutput('Submitting to judge...');
     try {
+      const storedUser = JSON.parse(localStorage.getItem('cf_user'));
+      const token = localStorage.getItem('cf_token');
+      if (!storedUser || !token) { 
+        setConsoleOutput('Please log in to submit code.');
+        setIsSubmitting(false);
+        return; 
+      }
+
       const res = await fetch(`${import.meta.env.VITE_API_URL}/submissions`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           problemId,
-          userId: DEMO_USER_ID,
           code,
           language
         })

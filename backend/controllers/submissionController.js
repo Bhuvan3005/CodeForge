@@ -5,7 +5,8 @@ import Progress from '../models/Progress.js';
 import { executeCode } from '../utils/codeExecutor.js';
 
 export const submitCode = async (req, res) => {
-  const { problemId, code, language, userId } = req.body;
+  const { problemId, code, language } = req.body;
+  const userId = req.user._id; // Use authenticated user ID
 
   try {
     const problem = await Problem.findById(problemId);
@@ -81,6 +82,11 @@ export const submitCode = async (req, res) => {
 
 export const getSubmissionsByUserId = async (req, res) => {
   try {
+    // SECURITY: Ensure user is requesting their own submissions
+    if (req.user._id.toString() !== req.params.userId) {
+      return res.status(403).json({ message: 'Access denied. You can only view your own history.' });
+    }
+
     const submissions = await Submission.find({ userId: req.params.userId }).populate('problemId', 'title');
     res.json(submissions);
   } catch (error) {

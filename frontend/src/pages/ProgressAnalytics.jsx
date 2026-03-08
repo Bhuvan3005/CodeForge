@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import { BarChart3, Target, Zap, TrendingUp, Award } from 'lucide-react';
 
-const DEMO_USER_ID = '69ac577afd45aa426e87ebc5';
+// Removed hardcoded DEMO_USER_ID
 
 const ProgressAnalytics = () => {
   const [data, setData] = useState(null);
@@ -15,7 +15,13 @@ const ProgressAnalytics = () => {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/progress/${DEMO_USER_ID}`);
+        const storedUser = JSON.parse(localStorage.getItem('cf_user'));
+        const token = localStorage.getItem('cf_token');
+        if (!storedUser || !token) { setLoading(false); return; }
+
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/progress/${storedUser._id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
         if (!res.ok) throw new Error('Failed to fetch');
         const progressData = await res.json();
         setData(progressData);

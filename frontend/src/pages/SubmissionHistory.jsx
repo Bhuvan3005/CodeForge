@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { History, Search, CheckCircle, XCircle, Clock, Eye } from 'lucide-react';
 
-const DEMO_USER_ID = '69ac577afd45aa426e87ebc5';
+// Removed hardcoded DEMO_USER_ID
 
 const SubmissionHistory = () => {
   const [submissions, setSubmissions] = useState([]);
@@ -12,7 +12,13 @@ const SubmissionHistory = () => {
   useEffect(() => {
     const fetchSubmissions = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/submissions/${DEMO_USER_ID}`);
+        const storedUser = JSON.parse(localStorage.getItem('cf_user'));
+        const token = localStorage.getItem('cf_token');
+        if (!storedUser || !token) { setLoading(false); return; }
+
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/submissions/${storedUser._id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
         const data = await res.json();
         setSubmissions(data);
       } catch (error) {

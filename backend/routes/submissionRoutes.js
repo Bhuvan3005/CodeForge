@@ -4,7 +4,7 @@ import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/', submitCode);
-router.get('/:userId', getSubmissionsByUserId);
+router.post('/', protect, submitCode);
+router.get('/:userId', protect, getSubmissionsByUserId);
 
 export default router;
