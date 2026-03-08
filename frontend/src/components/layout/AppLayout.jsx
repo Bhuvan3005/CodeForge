@@ -1,8 +1,14 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, Navigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 
 const AppLayout = () => {
+  const token = localStorage.getItem('cf_token');
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <div className="bg-glow" />

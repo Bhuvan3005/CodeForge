@@ -1,14 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings, User, Code2, Bell, Palette, Save } from 'lucide-react';
 
 const SettingsPage = () => {
   const [settings, setSettings] = useState({
-    name: 'Bhuvan',
-    email: 'bhuvan@example.com',
+    name: '',
+    email: '',
     language: 'javascript',
     editorTheme: 'one-dark',
     notifications: true,
   });
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('cf_user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setSettings(prev => ({
+          ...prev,
+          name: user.name || '',
+          email: user.email || ''
+        }));
+      } catch (e) {
+        console.error('Failed to parse user data', e);
+      }
+    }
+  }, []);
 
   const update = (key, val) => setSettings(p => ({ ...p, [key]: val }));
 

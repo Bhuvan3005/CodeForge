@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Compass, Code2, BarChart3, Route,
   History, Settings, Sparkles, ChevronLeft, ChevronRight,
-  Brain, Cpu
+  Brain, Cpu, LogOut
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -20,6 +20,13 @@ const NAV_ITEMS = [
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('cf_token');
+    localStorage.removeItem('cf_user');
+    navigate('/login');
+  };
 
   return (
     <aside style={{
@@ -99,6 +106,33 @@ const Sidebar = () => {
             </Link>
           );
         })}
+
+        {/* Spacer */}
+        <div style={{ flex: 1 }} />
+
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            padding: collapsed ? '12px 16px' : '10px 14px',
+            borderRadius: 'var(--radius-sm)',
+            color: '#ef4444',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '0.875rem',
+            transition: 'all 0.2s var(--ease)',
+            justifyContent: collapsed ? 'center' : 'flex-start',
+            width: '100%',
+          }}
+          title={collapsed ? 'Logout' : undefined}
+        >
+          <LogOut size={20} style={{ flexShrink: 0 }} />
+          {!collapsed && <span>Logout</span>}
+        </button>
       </nav>
 
       {/* Collapse toggle */}

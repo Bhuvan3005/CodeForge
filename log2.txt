@@ -1,0 +1,13 @@
+﻿7640b97 HEAD@{0}: checkout: moving from samarth to main
+84f2541 HEAD@{1}: commit: Refactor: added authentication
+7640b97 HEAD@{2}: checkout: moving from samarth to samarth
+7640b97 HEAD@{3}: checkout: moving from main to samarth
+7640b97 HEAD@{4}: merge Bhuvan: Fast-forward
+47d19d2 HEAD@{5}: checkout: moving from Bhuvan to main
+7640b97 HEAD@{6}: checkout: moving from main to Bhuvan
+47d19d2 HEAD@{7}: checkout: moving from Bhuvan to main
+7640b97 HEAD@{8}: checkout: moving from main to Bhuvan
+47d19d2 HEAD@{9}: checkout: moving from samarth to main
+30f8d56 HEAD@{10}: commit: Don't refer this commit
+47d19d2 HEAD@{11}: checkout: moving from main to samarth
+47d19d2 HEAD@{12}: clone: from https://github.com/Bhuvan3005/CodeForge.git

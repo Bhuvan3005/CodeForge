@@ -4,9 +4,6 @@ import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Responsi
 import { Sparkles, Flame, Target, TrendingUp, Clock, Zap, ArrowRight, AlertTriangle, CheckCircle } from 'lucide-react';
 import { TOPICS } from '../data/topics';
 
-// Demo User ID from Seeding
-const DEMO_USER_ID = '69ac577afd45aa426e87ebc5';
-
 const Dashboard = () => {
   const [progress, setProgress] = useState(null);
   const [user, setUser] = useState(null);
@@ -15,14 +12,22 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const storedUser = JSON.parse(localStorage.getItem('cf_user'));
+        const token = localStorage.getItem('cf_token');
+        if (!storedUser || !token) { setLoading(false); return; }
+
+        const userId = storedUser._id;
+
         const [progressRes, userRes] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/progress/${DEMO_USER_ID}`),
-          fetch(`${import.meta.env.VITE_API_URL}/auth/${DEMO_USER_ID}`)
+          fetch(`${import.meta.env.VITE_API_URL}/progress/${userId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }),
+          fetch(`${import.meta.env.VITE_API_URL}/auth/${userId}`)
         ]);
-        
+
         const progressData = await progressRes.json();
         const userData = await userRes.json();
-        
+
         setProgress(progressData);
         setUser(userData);
       } catch (error) {
@@ -36,19 +41,32 @@ const Dashboard = () => {
 
   if (loading) return <div className="page-container">Loading Dashboard...</div>;
 
-  const radarData = (progress?.topicProgress || []).map(tp => ({
-    subject: tp.topic,
-    mastery: tp.solved * 10, // Scaled for radar
-    fullMark: 100,
-  }));
+  let radarData = [];
+  if (progress?.topicProgress && progress.topicProgress.length > 0) {
+    radarData = progress.topicProgress.map(tp => ({
+      subject: tp.topic,
+      mastery: tp.solved * 10,
+      fullMark: 100,
+    }));
+  } else {
+    radarData = [
+      { subject: 'Arrays', mastery: 0, fullMark: 100 },
+      { subject: 'Strings', mastery: 0, fullMark: 100 },
+      { subject: 'Hash Maps', mastery: 0, fullMark: 100 },
+      { subject: 'Two Pointers', mastery: 0, fullMark: 100 },
+      { subject: 'Linked Lists', mastery: 0, fullMark: 100 },
+    ];
+  }
 
-  const weakTopics = [...(progress?.topicProgress || [])]
-    .sort((a, b) => a.solved - b.solved)
-    .slice(0, 3)
-    .map(tp => {
-      const topicInfo = TOPICS.find(t => t.name.includes(tp.topic)) || { icon: '🧩', name: tp.topic };
-      return { ...topicInfo, mastery: tp.solved * 10 };
-    });
+  const weakTopics = progress?.topicProgress?.length > 0
+    ? [...progress.topicProgress]
+      .sort((a, b) => a.solved - b.solved)
+      .slice(0, 3)
+      .map(tp => {
+        const topicInfo = TOPICS.find(t => t.name.includes(tp.topic)) || { icon: '🧩', name: tp.topic };
+        return { ...topicInfo, mastery: tp.solved * 10 };
+      })
+    : [{ icon: '🚀', name: 'Start Your Journey', mastery: 0, id: 'arrays' }];
 
   return (
     <div className="page-container">

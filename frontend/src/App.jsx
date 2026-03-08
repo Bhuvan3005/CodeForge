@@ -4,6 +4,7 @@ import AppLayout from './components/layout/AppLayout';
 
 // Pages
 import Landing from './pages/Landing';
+import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import TopicExplorer from './pages/TopicExplorer';
 import TopicLesson from './pages/TopicLesson';
@@ -23,6 +24,7 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
 
         {/* Problem Solver (full-screen, no sidebar) */}
         <Route path="/problems/:problemId" element={<ProblemSolver />} />
