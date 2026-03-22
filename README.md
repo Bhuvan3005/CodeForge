@@ -73,6 +73,4 @@ Make sure you have the following installed on your local machine:
 4. **Open your browser**
    Navigate to `http://localhost:5173` to see the application in action.
 
-## 📄 License
 
-This project is licensed under the MIT License.
