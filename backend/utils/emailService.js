@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 
 export const sendOtpEmail = async (toEmail, otpCode) => {
   const mailOptions = {
-    from: `"CodeForge" <${process.env.EMAIL_USER}>`,
+    from: `"CodeForge" <${process.env.SMTP_USER}>`,
     to: toEmail,
     subject: 'Your CodeForge Login Code',
     html: `

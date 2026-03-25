@@ -3,22 +3,20 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Compass, Code2, BarChart3, Route,
   History, Settings, Sparkles, ChevronLeft, ChevronRight,
-  Brain, Cpu, LogOut
+  Cpu, LogOut, User, Zap
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/topics', icon: Compass, label: 'Topics' },
-  { path: '/problems', icon: Code2, label: 'Problems' },
+  { path: '/problems', icon: Code2, label: 'Practice' },
   { path: '/generate', icon: Sparkles, label: 'AI Generator' },
-  { path: '/progress', icon: BarChart3, label: 'Progress' },
-  { path: '/path', icon: Route, label: 'Learning Path' },
-  { path: '/history', icon: History, label: 'History' },
-  { path: '/settings', icon: Settings, label: 'Settings' },
+  { path: '/path', icon: Route, label: 'Study Path' },
+  { path: '/progress', icon: BarChart3, label: 'Analytics' },
+  { path: '/history', icon: History, label: 'Submissions' },
 ];
 
-const Sidebar = () => {
-  const [collapsed, setCollapsed] = useState(false);
+const Sidebar = ({ collapsed, setCollapsed }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -30,129 +28,126 @@ const Sidebar = () => {
 
   return (
     <aside style={{
-      width: collapsed ? 72 : 240,
-      minHeight: '100vh',
-      background: 'var(--bg-surface)',
-      borderRight: '1px solid var(--border-subtle)',
+      width: collapsed ? 72 : 260,
+      height: '100vh',
+      background: '#0a0c10',
+      borderRight: '1px solid #1f2937',
       display: 'flex',
       flexDirection: 'column',
-      transition: 'width 0.3s var(--ease)',
+      transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
       position: 'fixed',
       top: 0,
       left: 0,
       zIndex: 100,
-      overflow: 'hidden',
     }}>
-      {/* Logo */}
+      {/* Branding */}
       <div style={{
-        padding: collapsed ? '20px 16px' : '20px 20px',
+        padding: collapsed ? '24px 16px' : '24px 20px',
         display: 'flex',
         alignItems: 'center',
         gap: 12,
-        borderBottom: '1px solid var(--border-subtle)',
+        marginBottom: 20
       }}>
         <div style={{
-          width: 38,
-          height: 38,
-          borderRadius: 'var(--radius-md)',
-          background: 'var(--accent-gradient)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
+          width: 36, height: 36, borderRadius: 10,
+          background: 'var(--primary)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0, boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)'
         }}>
           <Cpu size={20} color="white" />
         </div>
         {!collapsed && (
-          <div>
-            <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.1rem' }}>
+          <div style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}>
+            <div style={{ fontWeight: 800, fontSize: '1.2rem', color: 'white', letterSpacing: '-0.02em' }}>
               CodeForge
-            </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--text-muted)', letterSpacing: '0.1em' }}>
-              DSA ARCHITECT
             </div>
           </div>
         )}
       </div>
 
-      {/* Nav Items */}
-      <nav style={{ flex: 1, padding: '12px 8px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+      {/* Navigation */}
+      <nav style={{ flex: 1, padding: '0 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
         {NAV_ITEMS.map(item => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path ||
             (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
+          
           return (
             <Link
               key={item.path}
               to={item.path}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                padding: collapsed ? '12px 16px' : '10px 14px',
-                borderRadius: 'var(--radius-sm)',
-                color: isActive ? 'var(--accent-primary)' : 'var(--text-muted)',
-                background: isActive ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
-                textDecoration: 'none',
-                fontSize: '0.875rem',
-                fontWeight: isActive ? 600 : 400,
-                transition: 'all 0.2s var(--ease)',
+                display: 'flex', alignItems: 'center', gap: 12,
+                padding: collapsed ? '12px 0' : '10px 14px',
+                borderRadius: 10,
+                color: isActive ? 'white' : 'var(--text-secondary)',
+                background: isActive ? 'var(--primary-soft)' : 'transparent',
+                fontWeight: isActive ? 600 : 500,
                 justifyContent: collapsed ? 'center' : 'flex-start',
+                transition: 'all 0.2s',
               }}
+              className="nav-link"
               title={collapsed ? item.label : undefined}
             >
-              <Icon size={20} style={{ flexShrink: 0 }} />
-              {!collapsed && <span>{item.label}</span>}
+              <Icon size={20} style={{ color: isActive ? 'var(--primary)' : 'inherit' }} />
+              {!collapsed && <span style={{ fontSize: '0.9rem' }}>{item.label}</span>}
             </Link>
           );
         })}
+      </nav>
 
-        {/* Spacer */}
-        <div style={{ flex: 1 }} />
-
-        {/* Logout Button */}
+      {/* Footer Actions */}
+      <div style={{ padding: '20px 12px', borderTop: '1px solid #1f2937', display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <Link
+          to="/settings"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 12,
+            padding: collapsed ? '12px 0' : '10px 14px',
+            borderRadius: 10,
+            color: location.pathname === '/settings' ? 'white' : 'var(--text-secondary)',
+            background: location.pathname === '/settings' ? 'var(--primary-soft)' : 'transparent',
+            justifyContent: collapsed ? 'center' : 'flex-start',
+            transition: 'all 0.2s',
+          }}
+        >
+          <Settings size={20} />
+          {!collapsed && <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>Settings</span>}
+        </Link>
+        
         <button
           onClick={handleLogout}
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            padding: collapsed ? '12px 16px' : '10px 14px',
-            borderRadius: 'var(--radius-sm)',
+            display: 'flex', alignItems: 'center', gap: 12,
+            padding: collapsed ? '12px 0' : '10px 14px',
+            borderRadius: 10,
             color: '#ef4444',
             background: 'transparent',
             border: 'none',
             cursor: 'pointer',
-            fontSize: '0.875rem',
-            transition: 'all 0.2s var(--ease)',
             justifyContent: collapsed ? 'center' : 'flex-start',
-            width: '100%',
+            transition: 'all 0.2s',
           }}
-          title={collapsed ? 'Logout' : undefined}
         >
-          <LogOut size={20} style={{ flexShrink: 0 }} />
-          {!collapsed && <span>Logout</span>}
+          <LogOut size={20} />
+          {!collapsed && <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>Logout</span>}
         </button>
-      </nav>
 
-      {/* Collapse toggle */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        style={{
-          margin: '12px 8px',
-          padding: '10px',
-          background: 'rgba(255,255,255,0.04)',
-          border: '1px solid var(--border-subtle)',
-          borderRadius: 'var(--radius-sm)',
-          color: 'var(--text-muted)',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-      </button>
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          style={{
+            marginTop: 12,
+            padding: '8px',
+            background: '#1d232d',
+            border: '1px solid #1f2937',
+            borderRadius: 8,
+            color: 'var(--text-secondary)',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+        </button>
+      </div>
     </aside>
   );
 };

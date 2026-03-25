@@ -1,10 +1,11 @@
 import express from 'express';
-import { submitCode, getSubmissionsByUserId } from '../controllers/submissionController.js';
+import { submitCode, runCode, getSubmissionsByUserId } from '../controllers/submissionController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/', submitCode);
-router.get('/:userId', getSubmissionsByUserId);
+router.post('/', protect, submitCode);
+router.post('/run', protect, runCode);
+router.get('/:userId', protect, getSubmissionsByUserId);
 
 export default router;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Cpu, Mail, ArrowRight, Key, Github, Loader2 } from 'lucide-react';
+import { Cpu, Mail, ArrowRight, Key, Github, Loader2, ShieldCheck, Fingerprint, Chrome, AlertCircle } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -51,96 +51,116 @@ const Login = () => {
     } finally { setLoading(false); }
   };
 
-  const handleGoogleLogin = async () => {
-    setError('Google login requires VITE_GOOGLE_CLIENT_ID in your frontend .env file.');
-  };
-
-  const handleGithubLogin = () => {
-    setError('GitHub login requires OAuth app credentials configured in backend.');
+  const handleGoogleLogin = () => {
+    // Implementing Google OAuth redirection or popup here
+    // For now, showing info message as requested
+    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-dark)', position: 'relative' }}>
-      <div className="bg-glow" />
-      <div className="glass-card animate-fade-in-up" style={{ padding: 40, width: '100%', maxWidth: 440, position: 'relative', zIndex: 1 }}>
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 14, background: 'var(--accent-gradient)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
-            <Cpu size={24} color="white" />
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0c10', padding: '20px' }}>
+
+      <div className="card-professional animate-fade-in-up" style={{ padding: 48, width: '100%', maxWidth: 460, background: '#111318' }}>
+
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <div style={{ width: 56, height: 56, borderRadius: 16, background: 'var(--primary-soft)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, border: '1px solid var(--primary)' }}>
+            <Fingerprint size={28} color="var(--primary)" />
           </div>
-          <h1 style={{ fontSize: '1.6rem', marginBottom: 4 }}>Access CodeForge</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-            {step === 'email' ? 'Sign in to continue your journey' : `Check your email — ${email}`}
+          <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'white', marginBottom: 8 }}>Access System</h1>
+          <p style={{ color: 'var(--text-dim)', fontSize: '0.95rem', fontWeight: 500 }}>
+            {step === 'email' ? 'Enter your credentials to synchronize data' : `Verification code dispatched to ${email}`}
           </p>
         </div>
 
         {error && (
-          <div style={{ padding: 12, borderRadius: 8, background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#ef4444', fontSize: '0.85rem', marginBottom: 20, textAlign: 'center' }}>
-            {error}
+          <div style={{ padding: '12px 16px', borderRadius: 8, background: 'var(--error-soft)', border: '1px solid var(--error)', color: 'var(--error)', fontSize: '0.85rem', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10, fontWeight: 600 }}>
+            <AlertCircle size={16} /> {error}
           </div>
         )}
 
         {step === 'email' ? (
           <>
-            <form onSubmit={handleRequestOtp} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <form onSubmit={handleRequestOtp} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: 6 }}>Email Address</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 800, textTransform: 'uppercase', marginBottom: 8, letterSpacing: '0.05em' }}>Corporate Email</label>
                 <div style={{ position: 'relative' }}>
-                  <Mail size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <Mail size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)' }} />
                   <input
                     className="input-field"
-                    style={{ paddingLeft: 40, width: '100%' }}
+                    style={{ paddingLeft: 48, height: 52 }}
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder="name@company.com"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     required
                   />
                 </div>
               </div>
-              <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%', marginTop: 8, padding: '14px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
-                {loading ? <Loader2 size={16} className="animate-spin" /> : <>Continue with Email <ArrowRight size={16} /></>}
+              <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%', height: 52, borderRadius: 12, fontSize: '1rem' }}>
+                {loading ? <Loader2 size={20} className="animate-spin" /> : <>Identify <ArrowRight size={18} /></>}
               </button>
             </form>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '24px 0' }}>
-              <div style={{ flex: 1, height: 1, background: 'var(--border-light)' }} />
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>OR CONTINUE WITH</span>
-              <div style={{ flex: 1, height: 1, background: 'var(--border-light)' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, margin: '32px 0' }}>
+              <div style={{ flex: 1, height: 1, background: '#1f2937' }} />
+              <span style={{ color: 'var(--text-dim)', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase' }}>Secure Access</span>
+              <div style={{ flex: 1, height: 1, background: '#1f2937' }} />
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <button className="btn-secondary" style={{ width: '100%', background: '#24292e', color: '#fff', border: '1px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }} onClick={handleGithubLogin}>
-                <Github size={18} /> GitHub
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
+              <button
+                className="btn-secondary"
+                style={{
+                  height: 52, borderRadius: 12, background: 'white', color: '#0f172a',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+                  fontWeight: 700, border: 'none', transition: 'all 0.2s'
+                }}
+                onClick={handleGoogleLogin}
+              >
+                <Chrome size={20} /> Continue with Google
               </button>
+              <Link to="/signup" style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.85rem', textDecoration: 'none', marginTop: 12, fontWeight: 600 }} onMouseEnter={e => e.currentTarget.style.color = 'var(--primary)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-dim)'}>
+                Don't have an account? Create one
+              </Link>
             </div>
           </>
         ) : (
-          <form onSubmit={handleVerifyOtp} className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <form onSubmit={handleVerifyOtp} className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: 6 }}>6-Digit Verification Code</label>
+              <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 800, textTransform: 'uppercase', marginBottom: 8, letterSpacing: '0.05em' }}>Security Token</label>
               <div style={{ position: 'relative' }}>
-                <Key size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <Key size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)' }} />
                 <input
                   className="input-field"
-                  style={{ paddingLeft: 40, width: '100%', letterSpacing: '4px', textAlign: 'center' }}
+                  style={{ paddingLeft: 48, height: 52, letterSpacing: '8px', textAlign: 'center', fontSize: '1.2rem', fontWeight: 800 }}
                   type="text"
-                  placeholder="000000"
+                  placeholder="••••••"
                   maxLength={6}
                   value={otp}
                   onChange={e => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
                   required
                 />
               </div>
-              <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 12 }}>
-                Sent to {email}. <span style={{ color: 'var(--accent-primary)', cursor: 'pointer' }} onClick={() => setStep('email')}>Wrong email?</span>
-              </p>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+                <button type="button" onClick={() => setStep('email')} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>
+                  Change identification email
+                </button>
+              </div>
             </div>
-            <button type="submit" className="btn-primary" disabled={loading || otp.length < 6} style={{ width: '100%', marginTop: 8, padding: '14px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <>Verify Code <Key size={16} /></>}
+            <button type="submit" className="btn-primary" disabled={loading || otp.length < 6} style={{ width: '100%', height: 52, borderRadius: 12, fontSize: '1rem' }}>
+              {loading ? <Loader2 size={20} className="animate-spin" /> : <>Synchronize <ShieldCheck size={18} /></>}
             </button>
           </form>
         )}
       </div>
+
+      {/* Decorative Brand Tag */}
+      <div style={{ position: 'fixed', bottom: 32, display: 'flex', alignItems: 'center', gap: 12, opacity: 0.5 }}>
+        <div style={{ width: 32, height: 1, background: 'var(--text-dim)' }} />
+        <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>CodeForge Integrity</span>
+        <div style={{ width: 32, height: 1, background: 'var(--text-dim)' }} />
+      </div>
+
     </div>
   );
 };
